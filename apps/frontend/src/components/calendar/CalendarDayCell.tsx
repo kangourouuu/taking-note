@@ -31,11 +31,11 @@ export const CalendarDayCell: React.FC<CalendarDayCellProps> = ({
   return (
     <div
       onClick={handleCellClick}
-      className={`min-h-[125px] sm:min-h-[140px] border-b border-r border-zinc-200 p-2 flex flex-col justify-between transition-colors cursor-pointer group ${
+      className={`h-[135px] sm:h-[155px] md:h-[170px] border-b border-r border-zinc-200 p-2 flex flex-col transition-colors cursor-pointer group overflow-hidden ${
         isCurrentMonth ? "bg-white hover:bg-zinc-50/70" : "bg-zinc-50/50 text-zinc-400"
       }`}
     >
-      <div className="flex items-center justify-between mb-1.5">
+      <div className="flex items-center justify-between mb-1.5 shrink-0">
         <span
           className={`text-xs font-semibold inline-flex items-center justify-center w-6 h-6 rounded-full transition-colors ${
             isToday
@@ -48,14 +48,21 @@ export const CalendarDayCell: React.FC<CalendarDayCellProps> = ({
           {dayNumber}
         </span>
 
-        {isToday && (
-          <span className="text-[10px] uppercase font-bold tracking-wider text-black bg-zinc-100 px-1.5 py-0.5 rounded">
-            Today
-          </span>
-        )}
+        <div className="flex items-center gap-1">
+          {visibleNotes.length > 2 && (
+            <span className="text-[10px] text-zinc-400 font-medium px-1 bg-zinc-100 rounded">
+              {visibleNotes.length} notes
+            </span>
+          )}
+          {isToday && (
+            <span className="text-[10px] uppercase font-bold tracking-wider text-black bg-zinc-100 px-1.5 py-0.5 rounded">
+              Today
+            </span>
+          )}
+        </div>
       </div>
 
-      <div className="flex-1 flex flex-col gap-1.5 overflow-y-auto max-h-[105px] pr-0.5">
+      <div className="flex-1 min-h-0 overflow-y-auto pr-0.5 flex flex-col gap-1.5">
         {visibleNotes.map((note) => (
           <NoteChip key={note.id} note={note} />
         ))}
