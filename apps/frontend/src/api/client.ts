@@ -1,4 +1,16 @@
-const API_BASE_URL = import.meta.env["VITE_API_URL"] ?? "/api";
+function getApiBaseUrl(): string {
+  const envUrl = import.meta.env["VITE_API_URL"];
+  if (!envUrl || typeof envUrl !== "string") {
+    return "/api";
+  }
+  const trimmed = envUrl.trim().replace(/\/+$/, "");
+  if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
+    return trimmed.endsWith("/api") ? trimmed : `${trimmed}/api`;
+  }
+  return trimmed;
+}
+
+const API_BASE_URL = getApiBaseUrl();
 
 export class ApiError extends Error {
   constructor(
@@ -17,7 +29,8 @@ export async function request<T>(endpoint: string, options: RequestInit = {}): P
     ...(token ? { Authorization: `Bearer ${token}` } : {})
   };
 
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+  const cleanEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
+  const response = await fetch(`${API_BASE_URL}${cleanEndpoint}`, {
     ...options,
     headers: {
       ...headers,
@@ -32,9 +45,10 @@ export async function request<T>(endpoint: string, options: RequestInit = {}): P
   const data: T | { error?: string } = await response.json();
 
   if (!response.ok) {
-    const errorMsg = (typeof data === "object" && data !== null && "error" in data && typeof data.error === "string")
-      ? data.error
-      : `Request failed with status ${response.status}`;
+    const errorMsg =
+      typeof data === "object" && data !== null && "error" in data && typeof data.error === "string"
+        ? data.error
+        : `Request failed with status ${response.status}`;
     throw new ApiError(response.status, errorMsg);
   }
 
