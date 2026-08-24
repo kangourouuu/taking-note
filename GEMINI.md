@@ -209,10 +209,9 @@ CREATE TABLE note_tags (
 
 `.env` contains:
 ```env
-PORT=4000
-NODE_ENV=development
 APP_SECRET=replace_with_a_secure_random_string_of_minimum_32_characters
 DATABASE_URL=postgresql://postgres:password@localhost:5432/taking_note?sslmode=disable
+CORS_ORIGIN=http://localhost:5173
 VITE_API_URL=http://localhost:4000/api
 ```
 

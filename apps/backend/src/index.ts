@@ -21,6 +21,7 @@ dotenv.config();
 const port = Number(process.env["PORT"] ?? 4000);
 const secret = process.env["APP_SECRET"] ?? "taking_note_master_jwt_secret_key_minimum_32_characters_long_1234567890";
 const databaseUrl = process.env["DATABASE_URL"] ?? "postgresql://postgres:postgres@localhost:5432/taking_note?sslmode=disable";
+const corsOrigin = process.env["CORS_ORIGIN"];
 
 async function main(): Promise<void> {
   const { db, pool } = createDatabaseConnection(databaseUrl);
@@ -49,13 +50,18 @@ async function main(): Promise<void> {
   const tagController = new TagController(tagService);
   const noteController = new NoteController(noteService);
 
-  const app = createServer({
-    authController,
-    projectController,
-    tagController,
-    noteController,
-    jwtService
-  });
+  const app = createServer(
+    {
+      authController,
+      projectController,
+      tagController,
+      noteController,
+      jwtService
+    },
+    {
+      corsOrigin
+    }
+  );
 
   app.listen(port, () => {
     console.log(`Backend server running on http://localhost:${port}`);
