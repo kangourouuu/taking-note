@@ -77,9 +77,10 @@ export const MonthlyCalendar: React.FC = () => {
   const notesByDate = useMemo(() => {
     const map = new Map<string, NoteResponseDto[]>();
     for (const note of notes) {
-      const list = map.get(note.noteDate) ?? [];
+      const dateKey = note.noteDate ? (note.noteDate.split("T")[0] ?? note.noteDate) : "";
+      const list = map.get(dateKey) ?? [];
       list.push(note);
-      map.set(note.noteDate, list);
+      map.set(dateKey, list);
     }
     return map;
   }, [notes]);

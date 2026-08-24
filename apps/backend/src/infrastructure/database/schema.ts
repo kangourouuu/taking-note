@@ -34,7 +34,7 @@ export const notesTable = pgTable("notes", {
   title: varchar("title", { length: 255 }).notNull(),
   summary: varchar("summary", { length: 500 }),
   content: text("content").notNull(),
-  noteDate: date("note_date").notNull(),
+  noteDate: date("note_date", { mode: "string" }).notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull()
 });

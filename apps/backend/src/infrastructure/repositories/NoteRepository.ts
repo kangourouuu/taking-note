@@ -1,4 +1,4 @@
-import { and, eq, inArray, like, SQL } from "drizzle-orm";
+import { and, eq, inArray, gte, lte, SQL } from "drizzle-orm";
 import { INoteRepository, NoteFilterCriteria } from "../../domain/repositories/INoteRepository";
 import { Note } from "../../domain/entities/Note";
 import { Tag } from "../../domain/entities/Tag";
@@ -29,7 +29,7 @@ export class NoteRepository implements INoteRepository {
       record.title,
       record.summary,
       record.content,
-      record.noteDate,
+      this.formatDate(record.noteDate),
       tags,
       record.createdAt,
       record.updatedAt
@@ -44,7 +44,16 @@ export class NoteRepository implements INoteRepository {
     }
 
     if (criteria.month) {
-      conditions.push(like(notesTable.noteDate, `${criteria.month}-%`));
+      const [yearStr, monthStr] = criteria.month.split("-");
+      if (yearStr && monthStr) {
+        const y = parseInt(yearStr, 10);
+        const m = parseInt(monthStr, 10);
+        const startDate = `${y}-${String(m).padStart(2, "0")}-01`;
+        const lastDay = new Date(y, m, 0).getDate();
+        const endDate = `${y}-${String(m).padStart(2, "0")}-${String(lastDay).padStart(2, "0")}`;
+        conditions.push(gte(notesTable.noteDate, startDate));
+        conditions.push(lte(notesTable.noteDate, endDate));
+      }
     }
 
     if (criteria.tagIds && criteria.tagIds.length > 0) {
@@ -106,7 +115,7 @@ export class NoteRepository implements INoteRepository {
           r.title,
           r.summary,
           r.content,
-          r.noteDate,
+          this.formatDate(r.noteDate),
           tagsByNoteId.get(r.id) ?? [],
           r.createdAt,
           r.updatedAt
@@ -122,7 +131,7 @@ export class NoteRepository implements INoteRepository {
       title: note.title,
       summary: note.summary,
       content: note.content,
-      noteDate: note.noteDate,
+      noteDate: this.formatDate(note.noteDate),
       createdAt: note.createdAt,
       updatedAt: note.updatedAt
     });
@@ -147,7 +156,7 @@ export class NoteRepository implements INoteRepository {
         title: note.title,
         summary: note.summary,
         content: note.content,
-        noteDate: note.noteDate,
+        noteDate: this.formatDate(note.noteDate),
         updatedAt: note.updatedAt
       })
       .where(and(eq(notesTable.id, note.id), eq(notesTable.userId, note.userId)));
@@ -171,6 +180,10 @@ export class NoteRepository implements INoteRepository {
       .delete(notesTable)
       .where(and(eq(notesTable.id, id), eq(notesTable.userId, userId)));
     return (result.rowCount ?? 0) > 0;
+  }
+
+  private formatDate(rawDate: string): string {
+    return rawDate.split("T")[0] ?? rawDate;
   }
 
   private async getTagsForNote(noteId: string): Promise<Tag[]> {
