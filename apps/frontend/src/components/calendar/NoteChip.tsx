@@ -17,9 +17,9 @@ export const NoteChip: React.FC<NoteChipProps> = ({ note }) => {
   return (
     <div
       onClick={handleClick}
-      className="group relative bg-white hover:bg-zinc-50 border border-zinc-200 hover:border-zinc-400 rounded-md p-1.5 shadow-xs cursor-pointer transition-all duration-150 text-left overflow-hidden"
+      className="shrink-0 w-full group relative bg-white hover:bg-zinc-50 border border-zinc-200 hover:border-zinc-400 rounded-md p-1.5 shadow-xs cursor-pointer transition-all duration-150 text-left overflow-hidden select-none"
     >
-      <div className="flex items-center gap-1.5 mb-1">
+      <div className="flex items-center gap-1.5 mb-0.5">
         {note.tags.length > 0 && (
           <div className="flex items-center gap-1 shrink-0">
             {note.tags.map((tag) => (

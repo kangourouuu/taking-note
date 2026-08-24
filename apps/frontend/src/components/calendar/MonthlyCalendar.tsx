@@ -121,7 +121,7 @@ export const MonthlyCalendar: React.FC = () => {
           ))}
         </div>
 
-        <div className="grid grid-cols-7">
+        <div className="grid grid-cols-7 auto-rows-[140px] sm:auto-rows-[160px] md:auto-rows-[180px]">
           {daysGrid.map((day) => (
             <CalendarDayCell
               key={day.dateStr}

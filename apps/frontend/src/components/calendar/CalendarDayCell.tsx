@@ -31,7 +31,7 @@ export const CalendarDayCell: React.FC<CalendarDayCellProps> = ({
   return (
     <div
       onClick={handleCellClick}
-      className={`h-[135px] sm:h-[155px] md:h-[170px] border-b border-r border-zinc-200 p-2 flex flex-col transition-colors cursor-pointer group overflow-hidden ${
+      className={`h-full w-full min-h-0 border-b border-r border-zinc-200 p-2 flex flex-col transition-colors cursor-pointer group overflow-hidden ${
         isCurrentMonth ? "bg-white hover:bg-zinc-50/70" : "bg-zinc-50/50 text-zinc-400"
       }`}
     >
@@ -62,7 +62,7 @@ export const CalendarDayCell: React.FC<CalendarDayCellProps> = ({
         </div>
       </div>
 
-      <div className="flex-1 min-h-0 overflow-y-auto pr-0.5 flex flex-col gap-1.5">
+      <div className="flex-1 min-h-0 overflow-y-auto pr-1 flex flex-col gap-1.5 cell-scroll overscroll-contain">
         {visibleNotes.map((note) => (
           <NoteChip key={note.id} note={note} />
         ))}
