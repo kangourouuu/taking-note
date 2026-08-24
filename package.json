@@ -2,6 +2,7 @@
   "name": "taking-note-monorepo",
   "version": "1.0.0",
   "private": true,
+  "packageManager": "pnpm@10.5.2",
   "scripts": {
     "dev:backend": "pnpm --filter backend dev",
     "dev:frontend": "pnpm --filter frontend dev",
