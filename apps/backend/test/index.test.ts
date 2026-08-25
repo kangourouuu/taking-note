@@ -190,7 +190,7 @@ async function runTests(): Promise<void> {
 
   const authService = new AuthService(userRepo, passwordHasher, jwtService);
   const projectService = new ProjectService(projectRepo);
-  const tagService = new TagService(tagRepo);
+  const tagService = new TagService(tagRepo, projectRepo);
   const noteService = new NoteService(noteRepo, tagRepo, projectRepo);
 
   const authA = await authService.register({ username: "user_a", password: "password123" });
@@ -228,6 +228,11 @@ async function runTests(): Promise<void> {
   });
   assert.equal(tagA.name, "Urgent");
   assert.equal(tagA.colorHex, "#EF4444");
+  assert.equal(tagA.projectId, projectA.id);
+
+  const projectATags = await tagService.getTags(authA.user.id, projectA.id);
+  assert.equal(projectATags.length, 1);
+  assert.equal(projectATags[0]?.id, tagA.id);
 
   const noteA = await noteService.createNote(authA.user.id, {
     projectId: projectA.id,

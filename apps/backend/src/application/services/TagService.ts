@@ -1,11 +1,15 @@
 import { randomUUID } from "crypto";
 import { CreateTagDto, UpdateTagDto, TagResponseDto } from "@taking-note/shared";
 import { ITagRepository } from "../../domain/repositories/ITagRepository";
+import { IProjectRepository } from "../../domain/repositories/IProjectRepository";
 import { Tag } from "../../domain/entities/Tag";
 import { NotFoundError } from "../../domain/errors/DomainErrors";
 
 export class TagService {
-  constructor(private readonly tagRepository: ITagRepository) {}
+  constructor(
+    private readonly tagRepository: ITagRepository,
+    private readonly projectRepository?: IProjectRepository
+  ) {}
 
   public async getTags(userId: string, projectId?: string): Promise<TagResponseDto[]> {
     const tags = await this.tagRepository.findByUserId(userId, projectId);
@@ -21,6 +25,12 @@ export class TagService {
   }
 
   public async createTag(userId: string, dto: CreateTagDto): Promise<TagResponseDto> {
+    if (dto.projectId && this.projectRepository) {
+      const project = await this.projectRepository.findById(dto.projectId, userId);
+      if (!project) {
+        throw new NotFoundError("Project", dto.projectId);
+      }
+    }
     const tagId = randomUUID();
     const tag = Tag.create(tagId, userId, dto.name, dto.colorHex, dto.projectId);
     const saved = await this.tagRepository.save(tag);
@@ -31,6 +41,13 @@ export class TagService {
     const existing = await this.tagRepository.findById(id, userId);
     if (!existing) {
       throw new NotFoundError("Tag", id);
+    }
+
+    if (dto.projectId && this.projectRepository) {
+      const project = await this.projectRepository.findById(dto.projectId, userId);
+      if (!project) {
+        throw new NotFoundError("Project", dto.projectId);
+      }
     }
 
     const updated = new Tag(

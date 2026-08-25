@@ -42,7 +42,7 @@ async function main(): Promise<void> {
 
   const authService = new AuthService(userRepository, passwordHasher, jwtService);
   const projectService = new ProjectService(projectRepository);
-  const tagService = new TagService(tagRepository);
+  const tagService = new TagService(tagRepository, projectRepository);
   const noteService = new NoteService(noteRepository, tagRepository, projectRepository);
 
   const authController = new AuthController(authService);

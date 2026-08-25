@@ -27,6 +27,11 @@ export const TagModal: React.FC = () => {
 
   const handleSubmit = async (e: FormEvent): Promise<void> => {
     e.preventDefault();
+    if (!activeProject) {
+      setError("Please select a project first to create a tag");
+      return;
+    }
+
     setError(null);
     setIsSubmitting(true);
 
@@ -34,13 +39,14 @@ export const TagModal: React.FC = () => {
       if (editingTag) {
         await tagsApi.update(editingTag.id, {
           name,
-          colorHex
+          colorHex,
+          projectId: activeProject.id
         });
       } else {
         await tagsApi.create({
           name,
           colorHex,
-          projectId: activeProject?.id
+          projectId: activeProject.id
         });
       }
 
@@ -91,9 +97,7 @@ export const TagModal: React.FC = () => {
           {editingTag ? "Edit Tag" : "Create New Tag"}
         </h2>
         <p className="text-xs text-zinc-500 mb-5">
-          {editingTag
-            ? "Update your tag name and color tone"
-            : "Add a new tag with a custom color tone for your notes"}
+          {activeProject ? `Project: ${activeProject.name}` : "Select a project to manage tags"}
         </p>
 
         {error && (

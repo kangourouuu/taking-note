@@ -47,7 +47,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const { user } = useAuth();
 
   const [projects, setProjects] = useState<ProjectResponseDto[]>([]);
-  const [activeProject, setActiveProject] = useState<ProjectResponseDto | null>(null);
+  const [activeProject, setActiveProjectState] = useState<ProjectResponseDto | null>(null);
   const [tags, setTags] = useState<TagResponseDto[]>([]);
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
   const [activeMonth, setActiveMonth] = useState<string>(getCurrentMonthString());
@@ -62,19 +62,24 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [editingNote, setEditingNote] = useState<NoteResponseDto | null>(null);
   const [selectedNoteDate, setSelectedNoteDate] = useState<string | null>(null);
 
+  const setActiveProject = useCallback((project: ProjectResponseDto | null): void => {
+    setActiveProjectState(project);
+    setSelectedTagIds([]);
+  }, []);
+
   const refreshProjects = useCallback(async (): Promise<void> => {
     if (!user) return;
     try {
       const data = await projectsApi.getAll();
       setProjects(data);
       if (data.length > 0) {
-        setActiveProject((prev) => {
+        setActiveProjectState((prev) => {
           if (!prev) return data[0] ?? null;
           const found = data.find((p) => p.id === prev.id);
           return found ?? data[0] ?? null;
         });
       } else {
-        setActiveProject(null);
+        setActiveProjectState(null);
       }
     } catch (err) {
       console.error(err);
@@ -83,13 +88,17 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   const refreshTags = useCallback(async (): Promise<void> => {
     if (!user) return;
+    if (!activeProject) {
+      setTags([]);
+      return;
+    }
     try {
-      const data = await tagsApi.getAll();
+      const data = await tagsApi.getAll(activeProject.id);
       setTags(data);
     } catch (err) {
       console.error(err);
     }
-  }, [user]);
+  }, [user, activeProject]);
 
   const refreshNotes = useCallback(async (): Promise<void> => {
     if (!user || !activeProject) {
@@ -114,20 +123,25 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   useEffect(() => {
     if (user) {
       refreshProjects();
-      refreshTags();
     } else {
       setProjects([]);
-      setActiveProject(null);
+      setActiveProjectState(null);
       setTags([]);
       setNotes([]);
+      setSelectedTagIds([]);
     }
-  }, [user, refreshProjects, refreshTags]);
+  }, [user, refreshProjects]);
 
   useEffect(() => {
     if (activeProject) {
+      refreshTags();
       refreshNotes();
+    } else {
+      setTags([]);
+      setNotes([]);
+      setSelectedTagIds([]);
     }
-  }, [activeProject, activeMonth, refreshNotes]);
+  }, [activeProject, activeMonth, refreshTags, refreshNotes]);
 
   const toggleTagFilter = (tagId: string): void => {
     setSelectedTagIds((prev) =>
